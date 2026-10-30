@@ -4,3 +4,5 @@ public
 k8s
 skaffold.yaml
 data
+client/node_modules
+client/build

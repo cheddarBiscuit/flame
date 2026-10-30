@@ -1,4 +1,18 @@
-FROM node:24-alpine as builder
+# The client build only produces static files, so run it on the build machine's
+# own architecture instead of emulating the target platform.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS client-builder
+
+WORKDIR /app/client
+
+COPY client/package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY client ./
+
+RUN npm run build
+
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -10,12 +24,9 @@ RUN apk --no-cache --virtual build-dependencies add python3 make g++ \
 COPY . .
 
 RUN mkdir -p ./public ./data \
-    && cd ./client \
-    && npm install --production \
-    && npm run build \
-    && cd .. \
-    && mv ./client/build/* ./public \
     && rm -rf ./client
+
+COPY --from=client-builder /app/client/build/ ./public/
 
 FROM node:24-alpine
 
