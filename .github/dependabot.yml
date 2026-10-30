@@ -1,0 +1,39 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      server-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Major upgrades that need code changes; do them deliberately.
+      - dependency-name: express
+        update-types: ['version-update:semver-major']
+      - dependency-name: umzug
+        update-types: ['version-update:semver-major']
+      - dependency-name: sequelize
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: npm
+    directory: /client
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      client-minor-patch:
+        update-types: [minor, patch]
+    ignore:
+      # The client is on Create React App; majors are migration projects.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
