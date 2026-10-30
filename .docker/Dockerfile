@@ -20,11 +20,13 @@ RUN mkdir -p ./public ./data \
 FROM node:24-alpine
 
 # npm is only needed to build; dropping it removes its bundled dependencies
-# from the runtime image. su-exec lets the entrypoint drop root after chown.
+# from the runtime image. su-exec lets the entrypoint drop root after chown
+# (set PUID=0 to stay root).
 RUN apk add --no-cache su-exec \
     && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 COPY --from=builder /app /app
+COPY --from=builder --chmod=755 /app/.docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 WORKDIR /app
 
@@ -33,4 +35,4 @@ EXPOSE 5005
 ENV NODE_ENV=production
 ENV PASSWORD=flame_password
 
-CMD ["sh", "-c", "chown -R node /app/data /app/public && exec su-exec node node server.js"]
+CMD ["docker-entrypoint.sh"]
