@@ -19,6 +19,11 @@ RUN mkdir -p ./public ./data \
 
 FROM node:24-alpine
 
+# npm is only needed to build; dropping it removes its bundled dependencies
+# from the runtime image. su-exec lets the entrypoint drop root after chown.
+RUN apk add --no-cache su-exec \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 COPY --from=builder /app /app
 
 WORKDIR /app
@@ -28,4 +33,4 @@ EXPOSE 5005
 ENV NODE_ENV=production
 ENV PASSWORD=flame_password
 
-CMD ["sh", "-c", "chown -R node /app/data && node server.js"]
+CMD ["sh", "-c", "chown -R node /app/data /app/public && exec su-exec node node server.js"]
