@@ -93,6 +93,18 @@ secrets:
     file: ./secrets/flame_password
 ```
 
+##### Running as a different user
+
+The container starts as root, takes ownership of `/app/data` and `/app/public`, then drops to `PUID:PGID` (default `1000:1000`) before starting the server. Set `PUID` and `PGID` to run as another user, for example a dedicated NAS user that has read/write access to the data folder:
+
+```yaml
+environment:
+  - PUID=1026 # output of `id -u <user>`
+  - PGID=100 # output of `id -g <user>`
+```
+
+If the data folder uses ACLs that grant access by user name (e.g. Synology shared folders), the user needs to be granted access on the folder. Setting `PUID=0` skips the privilege drop and runs the server as root.
+
 #### Skaffold
 
 ```sh
